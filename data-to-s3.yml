@@ -1,0 +1,31 @@
+---
+- name: data-to-s3
+  hosts: '{{ target }}'
+  become: True
+  become_user: root
+
+  tasks:
+    - name: temporary spool directory
+      file:
+        path: "{{ local_path }}"
+        state: directory
+        mode: '0750'
+        owner: "{{ data_user }}"
+
+    - name: required package(s)
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - coreutils
+          - curl
+
+    - name: user cron to fetch and push to s3
+      cron:
+        name: "data-to-s3"
+        state: present
+        user: "{{ data_user }}"
+        minute: "*/10"
+        enabled: yes
+        job: 'FDATE=$(date +"%F_%H_%M_%S") && curl --silent {{ data_source_url }} --output {{ local_path }}/{{ fname_pattern }}-$FDATE.{{ fext }} && aws s3 mv {{ local_path }}/{{ fname_pattern }}-$FDATE.{{ fext }} {{ s3_path }}/'
