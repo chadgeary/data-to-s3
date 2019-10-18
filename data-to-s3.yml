@@ -27,5 +27,5 @@
         state: present
         user: "{{ data_user }}"
         minute: "*/10"
-        enabled: yes
+        state: present
         job: 'FDATE=$(date +"%F_%H_%M_%S") && curl --silent {{ data_source_url }} --output {{ local_path }}/{{ fname_pattern }}-$FDATE.{{ fext }} && aws s3 mv {{ local_path }}/{{ fname_pattern }}-$FDATE.{{ fext }} {{ s3_path }}/'
