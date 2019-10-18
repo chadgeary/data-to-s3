@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# set timestamp for filename
+FDATE=$(date +"%F_%H_%M_%S")
+
+# get file
+curl --silent {{ data_source_url }} --output {{ local_path }}/{{ fname_pattern }}-$FDATE.{{ fext }}
+
+# move file to aws
+aws s3 mv {{ local_path }}/{{ fname_pattern }}-$FDATE.{{ fext }} {{ s3_path }}/
